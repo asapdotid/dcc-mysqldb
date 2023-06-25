@@ -1,0 +1,27 @@
+version: "3"
+
+networks:
+  proxy:
+    driver: bridge
+    external: true
+
+services:
+  mysqldb:
+    image: ${DOCKER_NAMESPACE}/${DOCKER_IMAGE}:${DOCKER_IMAGE_TAG}
+    ports:
+      - "${DATABASE_DB_PORT}:3306"
+    networks:
+      - proxy
+    volumes:
+      - "${DATABASE_CONFIG_DIR}/app_custom.cnf:/opt/bitnami/mysql/conf/app_custom.cnf:ro"
+      - "${DATABASE_DATA_DIR}/development_db:/bitnami/mysql/data"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DATABASE_ROOT_PASSWORD}
+      - MYSQL_USER=${DATABASE_USER}
+      - MYSQL_PASSWORD=${DATABASE_PASSWORD}
+      - MYSQL_DATABASE=${DATABASE_DATABASE_NAME}
+    healthcheck:
+      test: ["CMD", "/opt/bitnami/scripts/mysql/healthcheck.sh"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
