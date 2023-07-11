@@ -10,15 +10,15 @@ networks:
 
 services:
   mysqldb-master:
-    image: ${DOCKER_NAMESPACE}/${DOCKER_IMAGE}:${DOCKER_IMAGE_TAG}
+    image: ${DOCKER_REGISTRY?}/${DOCKER_NAMESPACE?}/${DOCKER_IMAGE?}:${DOCKER_IMAGE_TAG?}
     ports:
       - "${DATABASE_DB_PORT}:3306"
     networks:
       - proxy
       - secure
     volumes:
-      - "${DATABASE_CONFIG_DIR}/app_custom.cnf:/opt/bitnami/mysql/conf/app_custom.cnf:ro"
-      - "${DATABASE_DATA_DIR}/db_master:/bitnami/mysql/data"
+      - ${DATABASE_CONFIG_DIR}/app_custom.cnf:/opt/bitnami/mysql/conf/app_custom.cnf:ro
+      - ${DATABASE_DATA_DIR}/db_master:/bitnami/mysql/data
     environment:
       - MYSQL_REPLICATION_MODE=master
       - MYSQL_REPLICATION_USER=${DATABASE_REPLICATION_USER}

@@ -51,5 +51,5 @@ init:
 	@cp ./.make/.env.example ./.make/.env
 	@for variable in $(ENVS); do \
 		echo $$variable | tee -a ./.make/.env; \
-		done
+	done
 	@echo "Please update your .make/.env file with your settings"
