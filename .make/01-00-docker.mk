@@ -1,19 +1,4 @@
-# Container names
-## must match the names used in the docker-composer.yml files
-DOCKER_SERVICE_DATABASE_NAME:=mariadb
 
-# FYI:
-# Naming convention for images is $(DOCKER_REGISTRY)/$(DOCKER_NAMESPACE)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)
-# e.g.                      docker.io/bitnami/mariadb:10.11.3
-# $(DOCKER_REGISTRY)    ------^           ^       ^      ^    docker.io
-# $(DOCKER_NAMESPACE)   ------------------^       ^      ^    bitnami
-# $(DOCKER_IMAGE_NAME)  --------------------------^      ^    mariadb
-# $(DOCKER_IMAGE_TAG)   ---------------------------------^    10.11.3
-
-DOCKER_DIR:=./src
-DOCKER_ENV_FILE:=$(DOCKER_DIR)/.env
-DOCKER_COMPOSE_FILE:=$(DOCKER_DIR)/compose.yml
-DOCKER_COMPOSE_DEV_FILE:=$(DOCKER_DIR)/compose.dev.yml
 
 # we need a couple of environment variables for docker-compose so we define a make-variable that we can
 # then reference later in the Makefile without having to repeat all the environment variables
@@ -26,10 +11,12 @@ DOCKER_COMPOSE_COMMAND:= \
 
 DOCKER_COMPOSE?=
 EXECUTE_IN_ANY_CONTAINER?=
-EXECUTE_IN_APPLICATION_CONTAINER?=
-DOCKER_SERVICE_NAME?=
-
 TYPE?=
+
+# Container names
+## must match the names used in the docker-composer.yml files
+DOCKER_SERVICE_MYSQLDB_MASTER:=mysqldb-master
+DOCKER_SERVICE_MYSQLDB_SLAVE:=mysqldb-slave
 
 ifeq ($(DOCKER_PROJECT_DEV),true)
 	DOCKER_COMPOSE:=$(DOCKER_COMPOSE_COMMAND) -f $(DOCKER_COMPOSE_DEV_FILE)
@@ -52,22 +39,24 @@ ifndef EXECUTE_IN_CONTAINER
 	endif
 endif
 ifeq ($(EXECUTE_IN_CONTAINER),true)
-	EXECUTE_IN_APPLICATION_CONTAINER:=$(DOCKER_COMPOSE) exec -T
+	EXECUTE_IN_APPLICATION_CONTAINER:=$(DOCKER_COMPOSE) exec -T $(DOCKER_SERVICE_NAME)
+    EXECUTE_IN_APPLICATION_MASTER:=$(DOCKER_COMPOSE) exec -T $(DOCKER_SERVICE_MYSQLDB_MASTER)
+	EXECUTE_IN_APPLICATION_SLAVE:=$(DOCKER_COMPOSE) exec -T $(DOCKER_SERVICE_MYSQLDB_SLAVE)
 endif
 
 ##@ [Docker: Compose commands]
 
-.PHONY: compose-init
-compose-init: compose/.env ## Docker compose initial environment
-compose-init:
-	@echo "Please update your docker/.env file with your settings"
+.PHONY: set-env
+set-env: compose/.env ## Docker compose initial environment
+set-env:
+	@echo "Please update your src/.env file with your settings"
 
-.PHONY: compose-clean
-compose-clean: ## Remove the .env file for docker
+.PHONY: del-env
+del-env: ## Remove the src/.env file for docker
 	@rm -f $(DOCKER_ENV_FILE)
 
-.PHONY: validate-compose-variables
-validate-docker-variables:
+.PHONY: validate-variables
+validate-variables:
 	@$(if $(DOCKER_REGISTRY),,$(error DOCKER_REGISTRY is undefined))
 	@$(if $(DOCKER_NAMESPACE),,$(error DOCKER_NAMESPACE is undefined))
 	@$(if $(DOCKER_IMAGE),,$(error DOCKER_IMAGE is undefined - Did you run make-init?))
@@ -77,36 +66,26 @@ validate-docker-variables:
 compose/.env:
 	@cp $(DOCKER_ENV_FILE).example $(DOCKER_ENV_FILE)
 
-.PHONY: compose-up
-compose-up: validate-compose-variables ## Create and start all docker containers. To create/start only a specific container, use DOCKER_SERVICE_NAME=<service>
+.PHONY: up
+up: validate-variables ## Create and start all docker containers. To create/start only a specific container, use DOCKER_SERVICE_NAME=<service>
 	@$(DOCKER_COMPOSE) up -d $(DOCKER_SERVICE_NAME)
 
-.PHONY: compose-up-scale
-compose-up-scale: validate-compose-variables ## Create and start all docker containers.
-	@$(DOCKER_COMPOSE) up -d $(DOCKER_SERVICE_NAME)
-
-.PHONY: compose-restart
-compose-restart: validate-compose-variables ## Restart docker containers.
-	@$(DOCKER_COMPOSE) restart $(DOCKER_SERVICE_NAME)
-
-.PHONY: compose-down
-compose-down: validate-compose-variables ## Stop and remove all docker containers.
+.PHONY: down
+down: validate-variables ## Stop and remove all docker containers.
 	@$(DOCKER_COMPOSE) down --remove-orphans -v
 
-.PHONY: compose-config
-compose-config: validate-compose-variables ## List the configuration docker compose
+.PHONY: restart
+restart: validate-variables ## Restart docker containers.
+	@$(DOCKER_COMPOSE) restart $(DOCKER_SERVICE_NAME)
+
+.PHONY: config
+config: validate-variables ## List the configuration
 	@$(DOCKER_COMPOSE) config $(DOCKER_SERVICE_NAME)
 
-.PHONY: compose-logs
-compose-logs: validate-compose-variables ## Logs docker containers.
+.PHONY: logs
+logs: validate-variables ## Logs docker containers.
 	@$(DOCKER_COMPOSE) logs --tail=100 -f $(DOCKER_SERVICE_NAME)
 
-.PHONY: compose-ps
-compose-ps: validate-compose-variables ## Docker composer PS containers.
+.PHONY: ps
+ps: validate-variables ## Docker composer PS containers.
 	@$(DOCKER_COMPOSE) ps $(DOCKER_SERVICE_NAME)
-
-##@ [Container: Shell]
-
-.PHONY: shell
-shell:  ## Execute shell script in container with ARGS="ls -al" for production TYPE=-master/-slave
-	@$(EXECUTE_IN_APPLICATION_CONTAINER) $(DOCKER_SERVICE_DATABASE_NAME)$(TYPE) $(ARGS)

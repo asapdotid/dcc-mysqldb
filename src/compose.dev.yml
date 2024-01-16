@@ -8,14 +8,14 @@ networks:
 services:
   mysqldb:
     image: ${DOCKER_REGISTRY?}/${DOCKER_NAMESPACE?}/${DOCKER_IMAGE?}:${DOCKER_IMAGE_TAG?}
-    user: root
+    restart: unless-stopped
     ports:
       - "${DATABASE_DB_PORT}:3306"
     networks:
       - proxy
     volumes:
       - ${DATABASE_CONFIG_DIR}/app_custom.cnf:/opt/bitnami/mysql/conf/app_custom.cnf:ro
-      - ${DATABASE_DATA_DIR}/development_db:/bitnami/mysql
+      - ${DATABASE_DATA_DIR}/development_db:/bitnami/mysql/data
     environment:
       - MYSQL_ROOT_PASSWORD=${DATABASE_ROOT_PASSWORD}
       - MYSQL_USER=${DATABASE_USER}
