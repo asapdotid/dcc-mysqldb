@@ -19,7 +19,7 @@ services:
       - secure
     volumes:
       - ${DATABASE_CONFIG_DIR}/app_custom.cnf:/opt/bitnami/mysql/conf/app_custom.cnf:ro
-      - ${DATABASE_DATA_DIR}/db_master:/bitnami/mysql/data
+      - ${DATABASE_DATA_DIR}/master_db:/bitnami/mysql/data
     environment:
       - MYSQL_REPLICATION_MODE=master
       - MYSQL_REPLICATION_USER=${DATABASE_REPLICATION_USER}
