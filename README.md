@@ -54,6 +54,32 @@ Or
 sudo chown -R 1001:1001 [.data/master_db]
 ```
 
+## Adminer - Database Management
+
+Optional for database management using Adminer:
+
+```yaml
+version: "3.7"
+
+networks:
+    proxy:
+        driver: bridge
+        external: true
+    secure:
+        driver: bridge
+        external: true
+
+services:
+    adminer:
+        image: adminer:latest
+        restart: unless-stopped
+        ports:
+            - "8080:8080"
+        networks:
+            - proxy
+            - secure
+```
+
 ## License
 
 MIT / BSD
