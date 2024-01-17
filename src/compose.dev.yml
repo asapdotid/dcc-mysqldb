@@ -14,7 +14,7 @@ services:
     networks:
       - proxy
     volumes:
-      - ${DATABASE_CONFIG_DIR}/app_custom.cnf:/opt/bitnami/mysql/conf/app_custom.cnf:ro
+      - ${DATABASE_CONFIG_DIR}/my_custom.cnf:/opt/bitnami/mysql/conf/my_custom.cnf:ro
       - ${DATABASE_DATA_DIR}/development_db:/bitnami/mysql/data
     environment:
       - MYSQL_ROOT_PASSWORD=${DATABASE_ROOT_PASSWORD}
