@@ -38,9 +38,11 @@ DOCKER_PROJECT_DEV=false
 
 📖 Docker compose Mysql DB config of `Bitnami Mysql` [link](https://hub.docker.com/r/bitnami/mysql)
 
-## Troubleshoot Persisting your database
+## Troubleshoot Persisting your data
 
 Error: `mkdir: cannot create directory '/bitnami/mysql/data': Permission denied`
+
+Read [documentation](https://github.com/bitnami/containers/blob/main/bitnami/mysql/README.md#persisting-your-database)
 
 Now chown this directory to `1001:1001` since the image is using UID `1001` as the user running the command:
 
