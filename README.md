@@ -1,11 +1,10 @@
 # Docker Compose MySQL DB
 
-Docker image base `bitnami/mysql` [link](https://hub.docker.com/r/bitnami/mysql)
+Docker image base `mysql` [link](https://hub.docker.com/_/mysql/)
 
 ## Make sure docker network exist:
 
 ```bash
-docker network create proxy
 docker network create secure
 ```
 
@@ -18,7 +17,7 @@ make help
 First of all:
 
 -   Init setup env: `make init`
--   Init docker compose env: `make compose-init`
+-   Init docker compose env: `make set-init`
 
 ## Web environment variables
 
@@ -36,24 +35,12 @@ Or
 DOCKER_PROJECT_DEV=false
 ```
 
-📖 Docker compose Mysql DB config of `Bitnami Mysql` [link](https://hub.docker.com/r/bitnami/mysql)
-
 ## Troubleshoot Persisting your data
-
-Error: `mkdir: cannot create directory '/bitnami/mysql/data': Permission denied`
-
-Read [documentation](https://github.com/bitnami/containers/blob/main/bitnami/mysql/README.md#persisting-your-database)
 
 Now chown this directory to `1001:1001` since the image is using UID `1001` as the user running the command:
 
 ```bash
-sudo chown -R 1001:1001 [.data/development_db]
-```
-
-Or
-
-```bash
-sudo chown -R 1001:1001 [.data/master_db]
+sudo chown -R 1001:1001 [.data]
 ```
 
 ## Adminer - Database Management
@@ -61,8 +48,7 @@ sudo chown -R 1001:1001 [.data/master_db]
 Optional for database management using Adminer:
 
 ```yaml
-version: "3.7"
-
+---
 networks:
     proxy:
         driver: bridge

@@ -5,23 +5,30 @@ networks:
     external: true
 
 services:
-  mysqldb:
-    image: ${DOCKER_REGISTRY?}/${DOCKER_NAMESPACE?}/${DOCKER_IMAGE?}:${DOCKER_IMAGE_TAG?}
+  mysqldb_master:
+    image: ${DOCKER_REGISTRY?}/${DOCKER_IMAGE?}:${DOCKER_IMAGE_TAG?}
     restart: unless-stopped
     ports:
-      - "${DATABASE_DB_PORT}:3306"
+      - "${DATABASE_DB_PORT:-3306}:3306"
+    environment:
+      - TZ=${DATABASE_TIMEZONE?}
+      - MYSQL_ROOT_PASSWORD=${DATABASE_ROOT_PASSWORD?}
+      - MYSQL_USER=${DATABASE_USER?}
+      - MYSQL_PASSWORD=${DATABASE_PASSWORD?}
+      - MYSQL_DATABASE=${DATABASE_DATABASE_NAME?}
+    volumes:
+      - ${DATABASE_CONFIG_DIR}/development:/etc/mysql/conf.d:ro
+      - ${DATABASE_DATA_DIR}/development_db:/var/lib/mysql:rw,cache
     networks:
       - proxy
-    volumes:
-      - ${DATABASE_CONFIG_DIR}/my_custom.cnf:/opt/bitnami/mysql/conf/my_custom.cnf:ro
-      - ${DATABASE_DATA_DIR}/development_db:/bitnami/mysql/data
-    environment:
-      - MYSQL_ROOT_PASSWORD=${DATABASE_ROOT_PASSWORD}
-      - MYSQL_USER=${DATABASE_USER}
-      - MYSQL_PASSWORD=${DATABASE_PASSWORD}
-      - MYSQL_DATABASE=${DATABASE_DATABASE_NAME}
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 100000
+        hard: 200000
     healthcheck:
-      test: ["CMD", "/opt/bitnami/scripts/mysql/healthcheck.sh"]
+      test:
+        ["CMD", "mysqladmin", "ping", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 15s
       timeout: 5s
       retries: 6

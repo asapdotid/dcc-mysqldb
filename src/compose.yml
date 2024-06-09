@@ -1,56 +1,64 @@
 ---
 networks:
-  proxy:
-    driver: bridge
-    external: true
   secure:
     driver: bridge
     external: true
 
 services:
-  mysqldb-master:
-    image: ${DOCKER_REGISTRY?}/${DOCKER_NAMESPACE?}/${DOCKER_IMAGE?}:${DOCKER_IMAGE_TAG?}
+  mysqldb_master:
+    image: ${DOCKER_REGISTRY:?error}/${DOCKER_IMAGE:?error}:${DOCKER_IMAGE_TAG:?error}
     restart: unless-stopped
     ports:
-      - "${DATABASE_DB_PORT}:3306"
+      - "${DATABASE_DB_PORT:-3306}:3306"
     networks:
-      - proxy
       - secure
-    volumes:
-      - ${DATABASE_CONFIG_DIR}/my_custom.cnf:/opt/bitnami/mysql/conf/my_custom.cnf:ro
-      - ${DATABASE_DATA_DIR}/master_db:/bitnami/mysql/data
     environment:
-      - MYSQL_REPLICATION_MODE=master
-      - MYSQL_REPLICATION_USER=${DATABASE_REPLICATION_USER}
-      - MYSQL_REPLICATION_PASSWORD=${DATABASE_REPLICATION_PASSWORD}
-      - MYSQL_ROOT_PASSWORD=${DATABASE_ROOT_PASSWORD}
-      - MYSQL_USER=${DATABASE_USER}
-      - MYSQL_PASSWORD=${DATABASE_PASSWORD}
-      - MYSQL_DATABASE=${DATABASE_DATABASE_NAME}
+      - TZ=${DATABASE_TIMEZONE:?error}
+      - MYSQL_ROOT_PASSWORD=${DATABASE_ROOT_PASSWORD:?error}
+      - MYSQL_USER=${DATABASE_USER:?error}
+      - MYSQL_PASSWORD=${DATABASE_PASSWORD:?error}
+      - MYSQL_DATABASE=${DATABASE_DATABASE_NAME:?error}
+    volumes:
+      - ${DATABASE_CONFIG_DIR:?error}/master:/etc/mysql/conf.d:ro
+      - ${DATABASE_DATA_DIR:?error}/master_db:/var/lib/mysql:rw,cache
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 100000
+        hard: 200000
     healthcheck:
-      test: ["CMD", "/opt/bitnami/scripts/mysql/healthcheck.sh"]
+      test:
+        ["CMD", "mysqladmin", "ping", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 15s
       timeout: 5s
       retries: 6
 
-  mysqldb-slave:
-    image: ${DOCKER_REGISTRY?}/${DOCKER_NAMESPACE?}/${DOCKER_IMAGE?}:${DOCKER_IMAGE_TAG?}
+  mysqldb_slave:
+    image: ${DOCKER_REGISTRY:?error}/${DOCKER_IMAGE:?error}:${DOCKER_IMAGE_TAG:?error}
     restart: unless-stopped
     ports:
-      - "3306"
+      - "${DATABASE_DB_SLAVE_PORT:-3309}:3306"
     networks:
       - secure
     depends_on:
-      - mysqldb-master
+      - mysqldb_master
     environment:
-      - MYSQL_REPLICATION_MODE=slave
-      - MYSQL_REPLICATION_USER=${DATABASE_REPLICATION_USER}
-      - MYSQL_REPLICATION_PASSWORD=${DATABASE_REPLICATION_PASSWORD}
-      - MYSQL_MASTER_HOST=mysqldb-master
-      - MYSQL_MASTER_PORT_NUMBER=3306
-      - MYSQL_ROOT_PASSWORD=${DATABASE_ROOT_PASSWORD}
+      - TZ=${DATABASE_TIMEZONE:?error}
+      - MYSQL_ROOT_PASSWORD=${DATABASE_ROOT_PASSWORD:?error}
+      - MYSQL_USER=${DATABASE_USER:?error}
+      - MYSQL_PASSWORD=${DATABASE_PASSWORD:?error}
+      - MYSQL_DATABASE=${DATABASE_DATABASE_NAME:?error}
+    volumes:
+      - ${DATABASE_CONFIG_DIR:?error}/slave:/etc/mysql/conf.d:ro
+      - ${DATABASE_DATA_DIR:?error}/slave_db:/var/lib/mysql:rw,cache
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 100000
+        hard: 200000
     healthcheck:
-      test: ["CMD", "/opt/bitnami/scripts/mysql/healthcheck.sh"]
+      test:
+        ["CMD", "mysqladmin", "ping", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 15s
       timeout: 5s
       retries: 6

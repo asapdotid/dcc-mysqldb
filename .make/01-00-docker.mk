@@ -4,7 +4,6 @@
 # then reference later in the Makefile without having to repeat all the environment variables
 DOCKER_COMPOSE_COMMAND:= \
  DOCKER_REGISTRY=$(DOCKER_REGISTRY) \
- DOCKER_NAMESPACE=$(DOCKER_NAMESPACE) \
  DOCKER_IMAGE=$(DOCKER_IMAGE) \
  DOCKER_IMAGE_TAG=$(DOCKER_IMAGE_TAG) \
  docker compose -p $(DOCKER_PROJECT_NAME) --env-file $(DOCKER_ENV_FILE)
@@ -15,8 +14,8 @@ TYPE?=
 
 # Container names
 ## must match the names used in the docker-composer.yml files
-DOCKER_SERVICE_MYSQLDB_MASTER:=mysqldb-master
-DOCKER_SERVICE_MYSQLDB_SLAVE:=mysqldb-slave
+DOCKER_SERVICE_MYSQLDB_MASTER:=mysqldb_master
+DOCKER_SERVICE_MYSQLDB_SLAVE:=mysqldb_slave
 
 ifeq ($(DOCKER_PROJECT_DEV),true)
 	DOCKER_COMPOSE:=$(DOCKER_COMPOSE_COMMAND) -f $(DOCKER_COMPOSE_DEV_FILE)
@@ -58,7 +57,6 @@ del-env: ## Remove the src/.env file for docker
 .PHONY: validate-variables
 validate-variables:
 	@$(if $(DOCKER_REGISTRY),,$(error DOCKER_REGISTRY is undefined))
-	@$(if $(DOCKER_NAMESPACE),,$(error DOCKER_NAMESPACE is undefined))
 	@$(if $(DOCKER_IMAGE),,$(error DOCKER_IMAGE is undefined - Did you run make-init?))
 	@$(if $(DOCKER_IMAGE_TAG),,$(error DOCKER_IMAGE_TAG is undefined - Did you run make-init?))
 	@$(if $(DOCKER_PROJECT_NAME),,$(error DOCKER_PROJECT_NAME is undefined - Did you run make-init?))
