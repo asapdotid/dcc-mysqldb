@@ -6,19 +6,19 @@ networks:
 
 services:
   mysqldb_master:
-    image: ${DOCKER_REGISTRY?}/${DOCKER_IMAGE?}:${DOCKER_IMAGE_TAG?}
+    image: ${DOCKER_REGISTRY:?error}/${DOCKER_IMAGE:?error}:${DOCKER_IMAGE_TAG:?error}
     restart: unless-stopped
     ports:
       - "${DATABASE_DB_PORT:-3306}:3306"
     environment:
-      - TZ=${DATABASE_TIMEZONE?}
-      - MYSQL_ROOT_PASSWORD=${DATABASE_ROOT_PASSWORD?}
-      - MYSQL_USER=${DATABASE_USER?}
-      - MYSQL_PASSWORD=${DATABASE_PASSWORD?}
-      - MYSQL_DATABASE=${DATABASE_DATABASE_NAME?}
+      - TZ=${DATABASE_TIMEZONE:?error}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:?error}
+      - MYSQL_USER=${MYSQL_USER:?error}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:?error}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:?error}
     volumes:
-      - ${DATABASE_CONFIG_DIR}/development:/etc/mysql/conf.d:ro
-      - ${DATABASE_DATA_DIR}/development_db:/var/lib/mysql:rw,cache
+      - ${DATABASE_CONFIG_DIR:?error}/development:/etc/mysql/conf.d:ro
+      - ${DATABASE_DATA_DIR:?error}/development_db:/var/lib/mysql:rw,cache
     networks:
       - proxy
     ulimits:

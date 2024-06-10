@@ -14,10 +14,10 @@ services:
       - secure
     environment:
       - TZ=${DATABASE_TIMEZONE:?error}
-      - MYSQL_ROOT_PASSWORD=${DATABASE_ROOT_PASSWORD:?error}
-      - MYSQL_USER=${DATABASE_USER:?error}
-      - MYSQL_PASSWORD=${DATABASE_PASSWORD:?error}
-      - MYSQL_DATABASE=${DATABASE_DATABASE_NAME:?error}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:?error}
+      - MYSQL_USER=${MYSQL_USER:?error}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:?error}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:?error}
     volumes:
       - ${DATABASE_CONFIG_DIR:?error}/master:/etc/mysql/conf.d:ro
       - ${DATABASE_DATA_DIR:?error}/master_db:/var/lib/mysql:rw,cache
@@ -44,10 +44,10 @@ services:
       - mysqldb_master
     environment:
       - TZ=${DATABASE_TIMEZONE:?error}
-      - MYSQL_ROOT_PASSWORD=${DATABASE_ROOT_PASSWORD:?error}
-      - MYSQL_USER=${DATABASE_USER:?error}
-      - MYSQL_PASSWORD=${DATABASE_PASSWORD:?error}
-      - MYSQL_DATABASE=${DATABASE_DATABASE_NAME:?error}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:?error}
+      - MYSQL_USER=${MYSQL_USER:?error}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:?error}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:?error}
     volumes:
       - ${DATABASE_CONFIG_DIR:?error}/slave:/etc/mysql/conf.d:ro
       - ${DATABASE_DATA_DIR:?error}/slave_db:/var/lib/mysql:rw,cache
