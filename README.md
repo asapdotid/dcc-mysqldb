@@ -68,6 +68,12 @@ services:
             - secure
 ```
 
+## Running utility script
+
+```bash
+docker exec -i database-mysqldb_master-1 sh -c './tmp/utility-db.sh'
+```
+
 ## License
 
 MIT / BSD
