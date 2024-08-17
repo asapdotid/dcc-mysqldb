@@ -194,3 +194,6 @@ Temporary Items
 .data/development_db/*
 !.data/development_db/.keepfile
 !.data/.keepfile
+backup/*
+!backup/.keepfile
+*test.sh

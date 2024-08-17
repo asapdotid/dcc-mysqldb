@@ -1,6 +1,6 @@
 ---
 networks:
-  proxy:
+  secure:
     driver: bridge
     external: true
 
@@ -19,8 +19,10 @@ services:
     volumes:
       - ${DATABASE_CONFIG_DIR:?error}/development:/etc/mysql/conf.d:ro
       - ${DATABASE_DATA_DIR:?error}/development_db:/var/lib/mysql:rw,cache
+      - ${DATABASE_SCRIPT_DIR:?error}/test.sh:/tmp/test.sh:ro
+      - ${DATABASE_BACKUP_DIR:?error}:/tmp/backup:rw
     networks:
-      - proxy
+      - secure
     ulimits:
       nproc: 65535
       nofile:

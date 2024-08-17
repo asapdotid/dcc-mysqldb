@@ -21,6 +21,8 @@ services:
     volumes:
       - ${DATABASE_CONFIG_DIR:?error}/master:/etc/mysql/conf.d:ro
       - ${DATABASE_DATA_DIR:?error}/master_db:/var/lib/mysql:rw,cache
+      - ${DATABASE_SCRIPT_DIR:?error}/test.sh:/tmp/test.sh:ro
+      - ${DATABASE_BACKUP_DIR:?error}:/tmp/backup:rw
     ulimits:
       nproc: 65535
       nofile:
