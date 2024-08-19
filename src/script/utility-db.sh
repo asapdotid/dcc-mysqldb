@@ -31,7 +31,7 @@ DB_PORT=3306
 
 function show_databases() {
     echo ""
-    echo "${LCYAN}Backup database on ${DB_HOST}:${DB_PORT}:${RESTORE} "
+    echo "${LCYAN}Show databases on ${DB_HOST}:${DB_PORT}:${RESTORE} "
     read -r -p "Database username: " DB_USERNAME
     # Disable echo
     stty -echo
