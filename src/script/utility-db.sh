@@ -67,7 +67,7 @@ function restore_database() {
         echo "Restore data table ${GREEN}$num${RESTORE}: ${YELLOW}$DB_NAME.$T${RESTORE}"
         mysql --max_allowed_packet=1024M --default-character-set=utf8 --binary-mode=1 --ssl-mode=disabled \
             --user="${DB_USERNAME}" --password="${DB_PASSWORD}" --host=${DB_HOST} --port=${DB_PORT} \
-            "${DB_NAME}" <"/tmp/backup/tables/${DB_NAME}-${T}.sql"
+            "${DB_NAME}" <"/tmp/backup/${DB_NAME}-tables/${T}.sql"
     done
     echo "${GREEN}Database ${DB_NAME} restored successfully${RESTORE}"
     echo ""
