@@ -1,4 +1,4 @@
-# Docker Compose MySQL DB
+# Docker Compose MySQL DB (LTS)
 
 Docker image base `mysql` [link](https://hub.docker.com/_/mysql/)
 
