@@ -80,7 +80,7 @@ function trucate_database() {
     for T in $(mysql --user="${DB_USERNAME}" --password="${DB_PASSWORD}" --host=${DB_HOST} --port=${DB_PORT} --ssl-mode=disabled -N -B -e "SHOW TABLES FROM $DB_NAME"); do
         num=$((i++))
         echo "Truncate data table ${GREEN}$num${RESTORE}: ${YELLOW}$DB_NAME.$T${RESTORE}"
-        mysql --user="${DB_USERNAME}" --password="${DB_PASSWORD}" --host=${DB_HOST} --port=${DB_PORT} --ssl-mode=disabled -N -B -e "TRUNCATE TABLE $DB_NAME.$T"
+        mysql --user="${DB_USERNAME}" --password="${DB_PASSWORD}" --host=${DB_HOST} --port=${DB_PORT} --ssl-mode=disabled -N -B -e "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE $DB_NAME.$T; SET FOREIGN_KEY_CHECKS = 1;"
     done
     echo "${GREEN}Truncate database ${DB_NAME} successfully${RESTORE}"
     echo ""
