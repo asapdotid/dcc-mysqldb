@@ -32,11 +32,24 @@ DB_USERNAME=root
 DB_PASSWORD=$MYSQL_ROOT_PASSWORD
 DB_NAME=$MYSQL_DATABASE
 
+credentialsFile=/tmp/mysql-credentials.cnf
+if [ ! -f "$credentialsFile" ]; then
+    touch "$credentialsFile"
+    {
+        echo "[client]"
+        echo "user=$DB_USERNAME"
+        echo "password=$DB_PASSWORD"
+        echo "host=$DB_HOST"
+        echo "port=$DB_PORT"
+        # echo "ssl-mode=DISABLED"
+    } >>$credentialsFile
+fi
+
 function show_databases() {
     echo ""
     echo "${LCYAN}Show databases on ${DB_HOST}:${DB_PORT}:${RESTORE} "
     i=1
-    for DB in $(mysql --user="${DB_USERNAME}" --password="${DB_PASSWORD}" --host=${DB_HOST} --port=${DB_PORT} -N -B -e "SHOW DATABASES"); do
+    for DB in $(mysql --defaults-extra-file="$credentialsFile" -N -B -e "SHOW DATABASES"); do
         num=$((i++))
         echo "Database ${GREEN}$num${RESTORE}: ${YELLOW}$DB${RESTORE}"
     done
@@ -51,7 +64,7 @@ function backup_database() {
         mkdir /tmp/backup
     fi
     echo "${LMAGENTA}Backup database...${RESTORE}"
-    mysqldump --user="${DB_USERNAME}" --password="${DB_PASSWORD}" --host=${DB_HOST} --port=${DB_PORT} --ssl-mode=disabled \
+    mysqldump --defaults-extra-file="$credentialsFile" \
         --max-allowed-packet=1024M --single-transaction --lock-tables --set-gtid-purged=OFF --no-data \
         "${T}" | gzip -c >"/tmp/backup/${DB_NAME}-${T}.sql.gz"
     echo "${GREEN}Database $DB_NAME backup created successfully${RESTORE}"
@@ -62,11 +75,11 @@ function restore_database() {
     echo "${LCYAN}Restore database on ${DB_HOST}:${DB_PORT}:${RESTORE} "
     echo "${LMAGENTA}Restore database...${RESTORE}"
     i=1
-    for T in $(mysql --user="${DB_USERNAME}" --password="${DB_PASSWORD}" --host=${DB_HOST} --port=${DB_PORT} --ssl-mode=disabled -N -B -e "SHOW TABLES FROM $DB_NAME"); do
+    for T in $(mysql --defaults-extra-file="$credentialsFile" -N -B -e "SHOW TABLES FROM $DB_NAME"); do
         num=$((i++))
         echo "Restore data table ${GREEN}$num${RESTORE}: ${YELLOW}$DB_NAME.$T${RESTORE}"
-        mysql --max_allowed_packet=1024M --default-character-set=utf8 --binary-mode=1 --ssl-mode=disabled \
-            --user="${DB_USERNAME}" --password="${DB_PASSWORD}" --host=${DB_HOST} --port=${DB_PORT} \
+        mysql --defaults-extra-file="$credentialsFile" \
+            --max_allowed_packet=1024M --default-character-set=utf8 --binary-mode=1 \
             "${DB_NAME}" <"/tmp/backup/${DB_NAME}-tables/${T}.sql"
     done
     echo "${GREEN}Database ${DB_NAME} restored successfully${RESTORE}"
@@ -77,10 +90,10 @@ function trucate_database() {
     echo "${LCYAN}Cleaning database on ${DB_HOST}:${DB_PORT}:${RESTORE} "
     echo "${LMAGENTA}Truncate database...${RESTORE}"
     i=1
-    for T in $(mysql --user="${DB_USERNAME}" --password="${DB_PASSWORD}" --host=${DB_HOST} --port=${DB_PORT} --ssl-mode=disabled -N -B -e "SHOW TABLES FROM $DB_NAME"); do
+    for T in $(mysql --defaults-extra-file="$credentialsFile" -N -B -e "SHOW TABLES FROM $DB_NAME"); do
         num=$((i++))
         echo "Truncate data table ${GREEN}$num${RESTORE}: ${YELLOW}$DB_NAME.$T${RESTORE}"
-        mysql --user="${DB_USERNAME}" --password="${DB_PASSWORD}" --host=${DB_HOST} --port=${DB_PORT} --ssl-mode=disabled -N -B -e "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE $DB_NAME.$T; SET FOREIGN_KEY_CHECKS = 1;"
+        mysql --defaults-extra-file="$credentialsFile" -N -B -e "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE $DB_NAME.$T; SET FOREIGN_KEY_CHECKS = 1;"
     done
     echo "${GREEN}Truncate database ${DB_NAME} successfully${RESTORE}"
     echo ""
