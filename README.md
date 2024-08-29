@@ -17,9 +17,32 @@ make help
 First of all:
 
 -   Init setup env: `make init`
--   Init docker compose env: `make set-init`
+-   Init docker compose env: `make set-env`
+-
+## Custom environment file
 
-## Web environment variables
+> After first command `make ini` do not change env file on `.make/.env`
+
+> After command `make set-env` can change value of env file on `src/.env`
+
+Running command `make`:
+
+```bash
+# Start docker compose
+make up
+```
+
+```bash
+# Stop docker compose
+make down
+```
+
+```bash
+# Check logs docker compose
+make logs
+```
+
+## MySQL environment variables
 
 You could custom environment of setup database to development or production on `.make/.env`:
 
@@ -40,12 +63,12 @@ DOCKER_PROJECT_DEV=false
 Now chown this directory to `1001:1001` since the image is using UID `1001` as the user running the command:
 
 ```bash
-sudo chown -R 1001:1001 [.data]
+sudo chown -R 1001:1001 .data
 ```
 
-## Adminer - Database Management
+## Database Management
 
-Optional for database management using Adminer:
+Optional for database management using Adminer [asapdotid/dcc-adminer](https://github.com/asapdotid/dcc-adminer)
 
 ```yaml
 ---
@@ -67,6 +90,13 @@ services:
             - proxy
             - secure
 ```
+
+Note:
+
+Connection to database:
+- Host: `mysqldb_master`        # MySQL service name
+- Username: `root`              # MySQL root user
+- Password: `my_S3cret`         # value of `MYSQL_ROOT_PASSWORD`
 
 ## Running utility script
 
